@@ -44,7 +44,7 @@ function App() {
  const handleNewConversation = async () => {
    try {
     // Tell backend to clear memory
-     await fetch('http://127.0.0.1:8000/api/clear/', {
+     await fetch('https://askyourpdf-backend.onrender.com0/api/clear/', {
        method: 'POST',
        headers: { 'Authorization': `Bearer ${getToken()}` }
      });
@@ -80,7 +80,7 @@ function App() {
     formData.append('file', file);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/upload/', {
+      const res = await fetch('https://askyourpdf-backend.onrender.com0/api/upload/', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${getToken()}`, // <--- JWT TOKEN ADDED
@@ -112,7 +112,7 @@ function App() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/ask/', {
+      const res = await fetch('https://askyourpdf-backend.onrender.com0/api/ask/', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
