@@ -228,8 +228,7 @@ function App() {
             <div className="chat-input-container">
               <div className="chat-input-wrapper">
                 <button className="icon-btn" onClick={handlePaperclipClick} title="Upload PDF">
-                  <FiPaperclip size={18} />
-                </button>
+                <FiPaperclip size={18} />                </button>
                 <input 
                   type="text" 
                   placeholder={fileUploaded ? "Ask a question..." : "Upload a PDF first..."} 
