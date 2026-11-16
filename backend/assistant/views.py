@@ -1,3 +1,4 @@
+
 import os
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -6,10 +7,9 @@ from django.core.files.storage import default_storage
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from django.http import HttpResponse # <--- Imported for manual CORS
+from django.http import HttpResponse
 from dotenv import load_dotenv
 
-# LangChain Imports
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -20,9 +20,8 @@ from langchain_core.output_parsers import StrOutputParser
 
 load_dotenv()
 
-# Store the document memory temporarily
+# Simplified memory for Render Free Tier
 VECTOR_STORE = None
-VECTOR_STORES_BY_USER = {} # <--- NEW: To keep files separate for different users
 
 class RegisterView(APIView):
     def post(self, request):
@@ -43,7 +42,6 @@ class UploadPDFView(APIView):
     parser_classes = (MultiPartParser, FormParser)
     permission_classes = [IsAuthenticated]
 
-    # 🔥 MANUAL CORS FOR PREFLIGHT
     def options(self, request, *args, **kwargs):
         response = HttpResponse()
         response["Access-Control-Allow-Origin"] = "https://frontend-six-omega-ig9gta7f.vercel.app"
@@ -52,9 +50,7 @@ class UploadPDFView(APIView):
         return response
 
     def post(self, request, *args, **kwargs):
-        global VECTOR_STORES_BY_USER
-        user_id = request.user.id
-        
+        global VECTOR_STORE
         file_obj = request.FILES.get('file')
         if not file_obj:
             return Response({"error": "No file uploaded"}, status=400)
@@ -66,15 +62,11 @@ class UploadPDFView(APIView):
             loader = PyPDFLoader(full_path)
             documents = loader.load()
             
-            # Split text into manageable chunks
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50) 
             chunks = text_splitter.split_documents(documents)
 
             embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-            vector_store = FAISS.from_documents(chunks, embeddings)
-
-            # Store it specific to the user
-            VECTOR_STORES_BY_USER[user_id] = vector_store
+            VECTOR_STORE = FAISS.from_documents(chunks, embeddings)
 
             return Response({"message": "File processed successfully!"})
         except Exception as e:
@@ -84,7 +76,6 @@ class UploadPDFView(APIView):
 class AskQuestionView(APIView):
     permission_classes = [IsAuthenticated]
 
-    # 🔥 MANUAL CORS FOR PREFLIGHT
     def options(self, request, *args, **kwargs):
         response = HttpResponse()
         response["Access-Control-Allow-Origin"] = "https://frontend-six-omega-ig9gta7f.vercel.app"
@@ -93,30 +84,23 @@ class AskQuestionView(APIView):
         return response
 
     def post(self, request, *args, **kwargs):
-        global VECTOR_STORES_BY_USER
-        user_id = request.user.id
+        global VECTOR_STORE
         question = request.data.get('question')
 
-        # Check if THIS user has uploaded a document
-        if user_id not in VECTOR_STORES_BY_USER:
+        if not VECTOR_STORE:
             return Response({"error": "Please upload a document first"}, status=400)
 
         try:
-            user_vector_store = VECTOR_STORES_BY_USER[user_id]
-
-            # 1. Retrieve the most relevant chunks
-            docs = user_vector_store.similarity_search(question, k=1)
+            docs = VECTOR_STORE.similarity_search(question, k=1)
             raw_context = "\n\n".join([doc.page_content for doc in docs])
             context = raw_context[:800] 
 
-            # 2. Connect to Groq
             llm = ChatGroq(
                 temperature=0, 
                 model_name="openai/gpt-oss-20b",
                 max_tokens=300 
             )
 
-            # 3. Simple Prompt
             prompt = ChatPromptTemplate.from_template("""
             Answer the question based only on this context:
             {context}
@@ -137,11 +121,6 @@ class ClearMemoryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        global VECTOR_STORES_BY_USER
-        user_id = request.user.id
-        
-        # Remove only this user's document
-        if user_id in VECTOR_STORES_BY_USER:
-            del VECTOR_STORES_BY_USER[user_id]
-            
+        global VECTOR_STORE
+        VECTOR_STORE = None
         return Response({"message": "Memory cleared successfully"})
