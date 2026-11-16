@@ -1,9 +1,10 @@
+
 import { useState } from 'react';
 import './App.css';
 import { FiFileText } from 'react-icons/fi';
 
 function Login({ onLogin }) {
-  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [isLoginMode, setIsLoginMode] = useState(true); // Toggle between Login and Signup
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -16,11 +17,13 @@ function Login({ onLogin }) {
     setSuccess('');
     setLoading(true);
 
+    // Point directly to your live Render backend
+    const backendUrl = 'https://askyourpdf-6xp2.onrender.com';
     const endpoint = isLoginMode ? '/api/token/' : '/api/register/';
     const body = { username, password };
 
     try {
-      const res = await fetch(`https://askyourpdf-backend.onrender.com${endpoint}`, {
+      const res = await fetch(`${backendUrl}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -30,19 +33,21 @@ function Login({ onLogin }) {
 
       if (res.ok) {
         if (isLoginMode) {
+          // If login is successful, save tokens and enter app
           localStorage.setItem('access_token', data.access);
           localStorage.setItem('refresh_token', data.refresh);
           onLogin(); 
         } else {
+          // If signup is successful, switch to login mode
           setSuccess('Account created! Please login.');
-          setIsLoginMode(true); 
-          setPassword(''); 
+          setIsLoginMode(true);
+          setPassword(''); // Clear password for safety
         }
       } else {
         setError(data.detail || data.error || 'Authentication failed');
       }
     } catch (err) {
-      setError('Server error. Is Django running?');
+      setError('Server error. Is the backend awake? (Wait 50s and try again)');
     }
     setLoading(false);
   };
@@ -85,7 +90,6 @@ function Login({ onLogin }) {
           </button>
         </form>
         
-        {/* CHANGED: Using a button instead of a span for keyboard accessibility */}
         <div className="login-footer">
           {isLoginMode ? "Don't have an account? " : "Already have an account? "}
           <button 
