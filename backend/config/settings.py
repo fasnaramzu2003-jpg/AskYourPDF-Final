@@ -131,5 +131,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = ["https://frontend-six-omega-lel9gtai7f.vercel.app"]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
