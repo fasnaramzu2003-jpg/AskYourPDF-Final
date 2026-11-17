@@ -1,5 +1,7 @@
+
 import { useState, useRef, useEffect } from 'react';
 import './App.css';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 import { FiUploadCloud, FiPlus, FiSearch, FiSettings, FiPaperclip, FiFileText, FiMoreVertical, FiX } from 'react-icons/fi';
 import Login from './Login'; 
 
@@ -44,7 +46,7 @@ function App() {
  const handleNewConversation = async () => {
    try {
     // Tell backend to clear memory
-     await fetch('http://127.0.0.1:8000/api/clear/', {
+     await fetch(`${API_BASE_URL}/api/clear/`, {
        method: 'POST',
        headers: { 'Authorization': `Bearer ${getToken()}` }
      });
@@ -80,7 +82,7 @@ function App() {
     formData.append('file', file);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/upload/', {
+      const res = await fetch(`${API_BASE_URL}/api/upload/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${getToken()}`, // <--- JWT TOKEN ADDED
@@ -112,7 +114,7 @@ function App() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/ask/', {
+      const res = await fetch(`${API_BASE_URL}/api/ask/`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

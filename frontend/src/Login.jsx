@@ -18,7 +18,7 @@ function Login({ onLogin }) {
     setLoading(true);
 
     // Point directly to your live Render backend
-    const backendUrl = 'http://127.0.0.1:8000';
+    const backendUrl = import.meta.env.VITE_API_URL;
     const endpoint = isLoginMode ? '/api/token/' : '/api/register/';
     const body = { username, password };
 
