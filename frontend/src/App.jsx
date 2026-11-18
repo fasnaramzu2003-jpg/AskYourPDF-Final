@@ -229,7 +229,19 @@ function App() {
                 <h2>{fileUploaded ? "Document Ready" : "Upload a PDF"}</h2>
                 <p>{fileUploaded ? fileName : "Select a document to analyze"}</p>
                 
-                <input type="file" id="fileUpload" ref={fileInputRef} className="hidden-file-input" accept=".pdf" onChange={handleFileUpload} />
+                <input
+                  type="file"
+                  id="fileUpload"
+                  ref={fileInputRef}
+                  className="hidden-file-input"
+                  accept="application/pdf,.pdf"
+                  onChange={(e) => {
+                    console.log("FILE SELECTED:", 
+                e.target.files[0]);
+                    handleFileUpload(e);
+                  }}
+                />
+
 
                 {!fileUploaded && (
                   <div className="upload-wrapper">
