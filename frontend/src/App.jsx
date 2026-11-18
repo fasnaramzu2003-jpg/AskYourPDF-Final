@@ -121,7 +121,8 @@ function App() {
       ...prev,
       {
         type: 'ai',
-        text: `Upload failed: ${err.message}`
+        text: `Upload failed: ${err.message}
+        | API URL: ${API_BASE_URL}`
       }
     ]);
 
