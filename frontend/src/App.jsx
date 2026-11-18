@@ -74,35 +74,62 @@ function App() {
 
   // --- FILE UPLOAD LOGIC (Now sends Token) ---
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const file = e.target.files[0];
+  if (!file) return;
 
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('file', file);
+  setLoading(true);
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/upload/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${getToken()}`, // <--- JWT TOKEN ADDED
-        },
-        body: formData,
-      });
-      const data = await res.json();
-      
-      if (res.ok) {
-        setFileUploaded(true);
-        setFileName(file.name);
-        setMessages([...messages, { type: 'ai', text: `Document "${file.name}" processed successfully! What would you like to know?` }]);
-      } else {
-        setMessages([...messages, { type: 'ai', text: `Error: ${data.detail || data.error}` }]);
-      }
-    } catch (err) {
-      setMessages([...messages, { type: 'ai', text: "Failed to connect to the server. Is Django running?" }]);
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/upload/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+      },
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      setFileUploaded(true);
+      setFileName(file.name);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: 'ai',
+          text: `Document "${file.name}" processed successfully! What would you like to know?`
+        }
+      ]);
+    } else {
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: 'ai',
+          text: `Error: ${data.detail || data.error || 'Upload failed'}`
+        }
+      ]);
     }
+
+  } catch (err) {
+    console.error("UPLOAD ERROR:", err);
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        type: 'ai',
+        text: `Upload failed: ${err.message}`
+      }
+    ]);
+
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
 
   // --- SEND CHAT LOGIC (Now sends Token) ---
   const handleSend = async () => {
