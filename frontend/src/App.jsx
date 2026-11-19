@@ -76,6 +76,13 @@ function App() {
   const handleFileUpload = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
+  try {
+  const buf = await file.arrayBuffer();
+  alert(`READ OK\nname: ${file.name}\nsize: ${file.size}\ntype: "${file.type}"\nbytes read: ${buf.byteLength}`);
+} catch (readErr) {
+  alert(`READ FAILED\nname: ${file.name}\nsize: ${file.size}\ntype: "${file.type}"\n${readErr.name}: ${readErr.message}`);
+  return;
+}
 
   setLoading(true);
 
