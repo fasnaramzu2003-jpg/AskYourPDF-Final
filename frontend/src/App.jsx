@@ -76,18 +76,20 @@ function App() {
   const handleFileUpload = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  try {
+  let safeFile;
+try {
   const buf = await file.arrayBuffer();
-  alert(`READ OK\nname: ${file.name}\nsize: ${file.size}\ntype: "${file.type}"\nbytes read: ${buf.byteLength}`);
+  safeFile = new File([buf], file.name, { type: file.type || 'application/pdf' });
 } catch (readErr) {
-  alert(`READ FAILED\nname: ${file.name}\nsize: ${file.size}\ntype: "${file.type}"\n${readErr.name}: ${readErr.message}`);
+  alert(`READ FAILED: ${readErr.name}: ${readErr.message}`);
   return;
 }
+
 
   setLoading(true);
 
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('file', safeFile);
 
   try {
     const res = await fetch(`${API_BASE_URL}/api/upload/`, {
