@@ -143,6 +143,7 @@ class UploadPDFView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        logger.warning("UPLOAD POST REQUEST RECEIVED")
 
         global VECTOR_STORE
 
